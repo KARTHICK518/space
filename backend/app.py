@@ -78,48 +78,69 @@ def get_bodies():
 with app.app_context():
     db.create_all()
     
-    if CelestialBody.query.count() == 0:
-        # Seed Solar System (Scaled sizes and distances for visualization)
-        bodies_data = [
-            # The Sun
-            {"name": "Sun", "type": "Star", "radius": 4.0, "distance_from_sun": 0.0, "orbital_speed": 0.0, "color": "#fbbf24", "texture": "sun.jpg", "description": "The star at the center of the Solar System."},
-            # Planets
-            {"name": "Mercury", "type": "Planet", "radius": 0.38, "distance_from_sun": 6.0, "orbital_speed": 0.41, "color": "#a8a29e", "texture": "mercury.jpg", "description": "The smallest planet in our solar system and closest to the Sun."},
-            {"name": "Venus", "type": "Planet", "radius": 0.95, "distance_from_sun": 9.0, "orbital_speed": 0.16, "color": "#fcd34d", "texture": "venus.jpg", "description": "Spinning in the opposite direction to most planets, Venus is the hottest planet."},
-            {"name": "Earth", "type": "Planet", "radius": 1.0, "distance_from_sun": 13.0, "orbital_speed": 0.1, "color": "#3b82f6", "texture": "earth.jpg", "description": "The only place we know of so far that's inhabited by living things."},
-            {"name": "Mars", "type": "Planet", "radius": 0.53, "distance_from_sun": 17.0, "orbital_speed": 0.05, "color": "#ef4444", "texture": "mars.jpg", "description": "A dusty, cold, desert world with a very thin atmosphere."},
-            {"name": "Jupiter", "type": "Planet", "radius": 2.5, "distance_from_sun": 25.0, "orbital_speed": 0.008, "color": "#d97706", "texture": "jupiter.jpg", "description": "More than twice as massive as the other planets of our solar system combined."},
-            {"name": "Saturn", "type": "Planet", "radius": 2.1, "distance_from_sun": 34.0, "orbital_speed": 0.003, "color": "#fde047", "texture": "saturn.jpg", "description": "Adorned with a dazzling, complex system of icy rings."},
-            {"name": "Uranus", "type": "Planet", "radius": 1.5, "distance_from_sun": 44.0, "orbital_speed": 0.001, "color": "#38bdf8", "texture": "uranus.jpg", "description": "The seventh planet from the Sun rotates at a nearly 90-degree angle from the plane of its orbit."},
-            {"name": "Neptune", "type": "Planet", "radius": 1.4, "distance_from_sun": 53.0, "orbital_speed": 0.0006, "color": "#1d4ed8", "texture": "neptune.jpg", "description": "The eighth and most distant major planet orbiting our Sun. It is dark, cold and whipped by supersonic winds."}
-        ]
-        
-        # Seed Planets
-        planet_objs = {}
-        for data in bodies_data:
+    # Seed Solar System (Scaled sizes and distances for visualization)
+    bodies_data = [
+        # The Sun
+        {"name": "Sun", "type": "Star", "radius": 4.0, "distance_from_sun": 0.0, "orbital_speed": 0.0, "color": "#fbbf24", "texture": "sun.jpg", "description": "The star at the center of the Solar System."},
+        # Planets
+        {"name": "Mercury", "type": "Planet", "radius": 0.38, "distance_from_sun": 6.0, "orbital_speed": 0.41, "color": "#a8a29e", "texture": "mercury.jpg", "description": "The smallest planet in our solar system and closest to the Sun."},
+        {"name": "Venus", "type": "Planet", "radius": 0.95, "distance_from_sun": 9.0, "orbital_speed": 0.16, "color": "#fcd34d", "texture": "venus.jpg", "description": "Spinning in the opposite direction to most planets, Venus is the hottest planet."},
+        {"name": "Earth", "type": "Planet", "radius": 1.0, "distance_from_sun": 13.0, "orbital_speed": 0.1, "color": "#3b82f6", "texture": "earth.jpg", "description": "The only place we know of so far that's inhabited by living things."},
+        {"name": "Mars", "type": "Planet", "radius": 0.53, "distance_from_sun": 17.0, "orbital_speed": 0.05, "color": "#ef4444", "texture": "mars.jpg", "description": "A dusty, cold, desert world with a very thin atmosphere."},
+        {"name": "Jupiter", "type": "Planet", "radius": 2.5, "distance_from_sun": 25.0, "orbital_speed": 0.008, "color": "#d97706", "texture": "jupiter.jpg", "description": "More than twice as massive as the other planets of our solar system combined."},
+        {"name": "Saturn", "type": "Planet", "radius": 2.1, "distance_from_sun": 34.0, "orbital_speed": 0.003, "color": "#fde047", "texture": "saturn.jpg", "description": "Adorned with a dazzling, complex system of icy rings."},
+        {"name": "Uranus", "type": "Planet", "radius": 1.5, "distance_from_sun": 44.0, "orbital_speed": 0.001, "color": "#38bdf8", "texture": "uranus.jpg", "description": "The seventh planet from the Sun rotates at a nearly 90-degree angle from the plane of its orbit."},
+        {"name": "Neptune", "type": "Planet", "radius": 1.4, "distance_from_sun": 53.0, "orbital_speed": 0.0006, "color": "#1d4ed8", "texture": "neptune.jpg", "description": "The eighth and most distant major planet orbiting our Sun. It is dark, cold and whipped by supersonic winds."}
+    ]
+
+    # Upsert planets — insert only if name not already in DB (prevents duplicates)
+    planet_objs = {}
+    newly_inserted = 0
+    for data in bodies_data:
+        existing = CelestialBody.query.filter_by(name=data['name']).first()
+        if existing:
+            planet_objs[data['name']] = existing
+        else:
             body = CelestialBody(**data)
             db.session.add(body)
             planet_objs[data['name']] = body
-            
+            newly_inserted += 1
+
+    if newly_inserted > 0:
         db.session.commit()
 
-        # Seed Moons
-        moons_data = [
-            {"planet_id": planet_objs["Earth"].id, "name": "Luna", "radius": 0.27, "distance_from_planet": 1.5, "orbital_speed": 1.3, "color": "#d1d5db"},
-            {"planet_id": planet_objs["Mars"].id, "name": "Phobos", "radius": 0.1, "distance_from_planet": 0.8, "orbital_speed": 2.0, "color": "#9ca3af"},
-            {"planet_id": planet_objs["Mars"].id, "name": "Deimos", "radius": 0.08, "distance_from_planet": 1.1, "orbital_speed": 1.5, "color": "#9ca3af"},
-            {"planet_id": planet_objs["Jupiter"].id, "name": "Io", "radius": 0.3, "distance_from_planet": 3.0, "orbital_speed": 1.8, "color": "#fde047"},
-            {"planet_id": planet_objs["Jupiter"].id, "name": "Europa", "radius": 0.25, "distance_from_planet": 3.5, "orbital_speed": 1.4, "color": "#e5e7eb"},
-            {"planet_id": planet_objs["Jupiter"].id, "name": "Ganymede", "radius": 0.4, "distance_from_planet": 4.2, "orbital_speed": 1.0, "color": "#9ca3af"},
-            {"planet_id": planet_objs["Jupiter"].id, "name": "Callisto", "radius": 0.38, "distance_from_planet": 5.0, "orbital_speed": 0.7, "color": "#6b7280"},
-            {"planet_id": planet_objs["Saturn"].id, "name": "Titan", "radius": 0.4, "distance_from_planet": 3.2, "orbital_speed": 1.2, "color": "#fcd34d"},
-        ]
+    # Seed moons only if they don't exist yet
+    moons_data = [
+        {"planet_name": "Earth",   "name": "Luna",     "radius": 0.27, "distance_from_planet": 1.5, "orbital_speed": 1.3, "color": "#d1d5db"},
+        {"planet_name": "Mars",    "name": "Phobos",   "radius": 0.1,  "distance_from_planet": 0.8, "orbital_speed": 2.0, "color": "#9ca3af"},
+        {"planet_name": "Mars",    "name": "Deimos",   "radius": 0.08, "distance_from_planet": 1.1, "orbital_speed": 1.5, "color": "#9ca3af"},
+        {"planet_name": "Jupiter", "name": "Io",       "radius": 0.3,  "distance_from_planet": 3.0, "orbital_speed": 1.8, "color": "#fde047"},
+        {"planet_name": "Jupiter", "name": "Europa",   "radius": 0.25, "distance_from_planet": 3.5, "orbital_speed": 1.4, "color": "#e5e7eb"},
+        {"planet_name": "Jupiter", "name": "Ganymede", "radius": 0.4,  "distance_from_planet": 4.2, "orbital_speed": 1.0, "color": "#9ca3af"},
+        {"planet_name": "Jupiter", "name": "Callisto", "radius": 0.38, "distance_from_planet": 5.0, "orbital_speed": 0.7, "color": "#6b7280"},
+        {"planet_name": "Saturn",  "name": "Titan",    "radius": 0.4,  "distance_from_planet": 3.2, "orbital_speed": 1.2, "color": "#fcd34d"},
+    ]
 
-        for data in moons_data:
-            moon = Moon(**data)
-            db.session.add(moon)
-            
+    moon_inserted = 0
+    for data in moons_data:
+        planet = planet_objs.get(data['planet_name'])
+        if planet and planet.id:
+            existing_moon = Moon.query.filter_by(name=data['name'], planet_id=planet.id).first()
+            if not existing_moon:
+                moon = Moon(
+                    planet_id=planet.id,
+                    name=data['name'],
+                    radius=data['radius'],
+                    distance_from_planet=data['distance_from_planet'],
+                    orbital_speed=data['orbital_speed'],
+                    color=data['color']
+                )
+                db.session.add(moon)
+                moon_inserted += 1
+
+    if moon_inserted > 0:
         db.session.commit()
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
