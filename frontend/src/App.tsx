@@ -102,7 +102,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/bodies')
+    fetch(`${import.meta.env.VITE_API_URL}/api/bodies`)
       .then(res => res.json())
       .then(data => {
         setBodies(data)
@@ -116,7 +116,7 @@ function App() {
 
   // Tour Mode
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isTouring && bodies.length > 0) {
       const planets = bodies.filter(b => b.distance_from_sun !== 0);
       if (planets.length === 0) return;
