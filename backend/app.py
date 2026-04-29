@@ -59,6 +59,10 @@ class Moon(db.Model):
             'color': self.color
         }
 
+@app.route('/')
+def home():
+    return "Backend is running successfully 🚀"
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "message": "Space Explorer backend is running!"})
