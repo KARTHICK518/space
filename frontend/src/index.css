@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-space-900: #0b0d17;
+  --color-space-800: #15192b;
+  --color-space-700: #232946;
+  --color-accent-blue: #4ade80;
+  --color-accent-purple: #c084fc;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-space-900 text-white font-sans overflow-hidden m-0 p-0;
+  }
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ── Planet hover / selection label chip ─────────────────── */
+.planet-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: rgba(6, 8, 24, 0.75);
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+  transform: translateY(-8px);
+  opacity: 0.95;
+  box-shadow: 0 0 12px -2px currentColor;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Info panel scrollbar ────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #232946;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4ade80;
+}
