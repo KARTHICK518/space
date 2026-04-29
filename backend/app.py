@@ -68,12 +68,10 @@ def get_bodies():
     bodies = CelestialBody.query.all()
     return jsonify([body.to_dict() for body in bodies])
 
-if __name__ == '__main__':
-    with app.app_context():
-        # Drop and recreate for schema updates during development
-        db.drop_all()
-        db.create_all()
-        
+with app.app_context():
+    db.create_all()
+    
+    if CelestialBody.query.count() == 0:
         # Seed Solar System (Scaled sizes and distances for visualization)
         bodies_data = [
             # The Sun
@@ -115,5 +113,6 @@ if __name__ == '__main__':
             db.session.add(moon)
             
         db.session.commit()
-    
-    app.run(debug=True, port=5000)
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000)
