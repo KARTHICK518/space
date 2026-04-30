@@ -66,16 +66,25 @@ class Moon(db.Model):
 def home():
     return "Backend is running successfully 🚀"
 
-@app.route('/api/health', methods=['GET'])
+@app.route('/api/health', methods=['GET'], strict_slashes=False)
 def health_check():
     return jsonify({"status": "healthy", "message": "Space Explorer backend is running!"})
 
-@app.route('/api/bodies', methods=['GET'])
+@app.route('/api/bodies', methods=['GET'], strict_slashes=False)
 def get_bodies():
     bodies = CelestialBody.query.all()
     return jsonify([body.to_dict() for body in bodies])
 
+@app.route('/test', strict_slashes=False)
+def test():
+    return "API working"
+
 with app.app_context():
+    # Print routes for debugging in production logs
+    print("Registered Routes:")
+    for rule in app.url_map.iter_rules():
+        print(f"{rule.endpoint}: {rule}")
+    
     try:
         db.create_all()
         
